@@ -105,7 +105,7 @@ export const RECENT_SEARCHES = [
   'Elegant living room',
 ]
 
-const PLATFORMS = ['Myntra', 'Amazon', 'Ajio', 'Nykaa', 'Pepperfry', 'Urban Ladder', 'Flipkart']
+export const PLATFORMS = ['Myntra', 'Amazon', 'Ajio', 'Nykaa', 'Pepperfry', 'Urban Ladder', 'Flipkart']
 
 const TONES = [
   'oklch(0.93 0.03 80)',
