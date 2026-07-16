@@ -1,112 +1,105 @@
 'use client'
 
 import { useState } from 'react'
-import { FolderPlus, Trash2, Plus } from 'lucide-react'
-import { SectionHeading } from '@/components/section-heading'
-import { ProductGrid } from '@/components/product-grid'
+import { Plus, X } from 'lucide-react'
+import { PageHeader } from '@/components/page-header'
+import { CollectionCard } from '@/components/collection-card'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { useWorkspace } from '@/lib/workspace-context'
-import { PRODUCTS } from '@/lib/data'
 
 export default function CollectionsPage() {
-  const { collections, createCollection, deleteCollection, addProductToCollection, removeProductFromCollection } = useWorkspace()
-  const [showCreate, setShowCreate] = useState(false)
-  const [newName, setNewName] = useState('')
-  const [newDesc, setNewDesc] = useState('')
+  const { savedCollections, createCollection } = useWorkspace()
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+
+  const suggestions = [
+    'Minimal Living Room',
+    'Balcony Inspiration',
+    'Office Outfit Ideas',
+    'Housewarming Gifts',
+  ]
 
   function handleCreate() {
-    if (!newName.trim()) return
-    createCollection(newName.trim(), newDesc.trim() || 'My curated collection')
-    setNewName('')
-    setNewDesc('')
-    setShowCreate(false)
+    if (!name.trim()) return
+    createCollection(name.trim(), description.trim())
+    setName('')
+    setDescription('')
+    setOpen(false)
   }
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 lg:px-8 lg:py-12">
-      <SectionHeading
-        title="Your Collections"
-        subtitle="Organize products into themed collections for your carousels"
-      />
+      <PageHeader
+        eyebrow="Collections"
+        title="Your curated collections"
+        description="Group products into beautiful collections you can compare, refine, and share when they're ready."
+      >
+        <Button onClick={() => setOpen((v) => !v)}>
+          <Plus className="size-4" /> New Collection
+        </Button>
+      </PageHeader>
 
-      <div className="mb-6">
-        {showCreate ? (
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <div className="flex flex-col gap-3">
-              <input
-                type="text"
-                placeholder="Collection name"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+      {open && (
+        <div className="mt-8 animate-fade-up rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-serif text-xl font-semibold text-foreground">
+              Create a collection
+            </h2>
+            <Button variant="ghost" size="icon-sm" aria-label="Close" onClick={() => setOpen(false)}>
+              <X className="size-4" />
+            </Button>
+          </div>
+          <div className="flex flex-col gap-4">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">
+                Collection name
+              </label>
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Cozy Coffee Corner"
               />
-              <input
-                type="text"
-                placeholder="Description (optional)"
-                value={newDesc}
-                onChange={(e) => setNewDesc(e.target.value)}
-                className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <div className="flex gap-2">
-                <Button onClick={handleCreate} disabled={!newName.trim()}>
-                  Create
-                </Button>
-                <Button variant="outline" onClick={() => setShowCreate(false)}>
-                  Cancel
-                </Button>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {suggestions.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setName(s)}
+                    className="rounded-full border border-border bg-secondary px-3 py-1 text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    {s}
+                  </button>
+                ))}
               </div>
             </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">
+                Description
+              </label>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="What's the vibe of this collection?"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreate}>Create Collection</Button>
+            </div>
           </div>
-        ) : (
-          <Button onClick={() => setShowCreate(true)}>
-            <Plus className="size-4" /> New Collection
-          </Button>
-        )}
-      </div>
-
-      {collections.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-card/60 px-6 py-20 text-center">
-          <FolderPlus className="size-12 text-muted-foreground" />
-          <p className="mt-4 text-pretty text-muted-foreground">
-            No collections yet. Create one to start organizing products for your carousels.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-8">
-          {collections.map((collection) => {
-            const products = collection.productIds
-              .map((id) => PRODUCTS.find((p) => p.id === id))
-              .filter(Boolean) as typeof PRODUCTS
-
-            return (
-              <div key={collection.id} id={collection.id} className="rounded-2xl border border-border bg-card p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <h3 className="font-serif text-xl font-semibold text-foreground">{collection.name}</h3>
-                    <p className="text-sm text-muted-foreground">{collection.description}</p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label="Delete collection"
-                    onClick={() => deleteCollection(collection.id)}
-                  >
-                    <Trash2 className="size-4 text-destructive" />
-                  </Button>
-                </div>
-
-                {products.length > 0 ? (
-                  <ProductGrid products={products} />
-                ) : (
-                  <p className="py-8 text-center text-sm text-muted-foreground">
-                    No products in this collection yet. Browse and add products from the home page.
-                  </p>
-                )}
-              </div>
-            )
-          })}
         </div>
       )}
+
+      <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {savedCollections.map((collection) => (
+          <CollectionCard key={collection.id} collection={collection} />
+        ))}
+      </div>
     </div>
   )
 }

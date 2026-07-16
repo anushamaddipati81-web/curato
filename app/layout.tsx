@@ -1,36 +1,47 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { WorkspaceProvider } from "@/lib/workspace-context";
-import { Navbar } from "@/components/navbar";
+import { Analytics } from '@vercel/analytics/next'
+import type { Metadata, Viewport } from 'next'
+import { Inter, Playfair_Display } from 'next/font/google'
+import { WorkspaceProvider } from '@/lib/workspace-context'
+import { DashboardShell } from '@/components/dashboard-shell'
+import './globals.css'
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-playfair',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
-  title: "Curato — Discover products for your Instagram carousels",
-  description: "Find real products faster and collect links for creating Instagram carousels.",
-};
+  title: 'Curato — Curate beautiful collections',
+  description:
+    'Curato is a personal AI-powered product research and curation workspace for fashion and home decor. Discover, organize, compare, and curate beautiful collections.',
+  generator: 'v0.app',
+}
+
+export const viewport: Viewport = {
+  colorScheme: 'light',
+  themeColor: '#f7f4ee',
+}
 
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}: Readonly<{
+  children: React.ReactNode
+}>) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body>
+    <html lang="en" className={`${inter.variable} ${playfair.variable} bg-background`}>
+      <body className="font-sans antialiased">
         <WorkspaceProvider>
-          <div className="min-h-screen">
-            <Navbar />
-            <main className="pb-20">{children}</main>
-          </div>
+          <DashboardShell>{children}</DashboardShell>
         </WorkspaceProvider>
+        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
-  );
+  )
 }
