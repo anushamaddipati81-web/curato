@@ -1,31 +1,28 @@
 import Link from 'next/link'
-import { ArrowUpRight } from 'lucide-react'
-import { type HomeSpace } from '@/lib/data'
-import { ProductImage } from '@/components/product-image'
+import { ArrowRight } from 'lucide-react'
+import type { HomeSpace } from '@/lib/data'
 
 export function SpaceCard({ space }: { space: HomeSpace }) {
   return (
     <Link
       href={`/home-spaces/${space.slug}`}
-      className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md"
     >
-      <div className="relative">
-        <ProductImage
-          category={space.name}
-          tone={space.tone}
-          className="aspect-16/10 w-full"
-          iconClassName="size-16"
+      <div className="relative aspect-4/3 overflow-hidden">
+        <img
+          src={space.image}
+          alt={space.name}
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
         />
-        <span className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full bg-card/90 text-foreground shadow-sm backdrop-blur transition-transform group-hover:scale-105">
-          <ArrowUpRight className="size-4.5" />
-        </span>
-      </div>
-      <div className="flex flex-1 flex-col gap-1.5 p-5">
-        <div className="flex items-center justify-between">
-          <h3 className="font-serif text-lg font-semibold text-foreground">{space.name}</h3>
-          <span className="text-xs text-muted-foreground">{space.productIds.length} items</span>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+        <div className="absolute bottom-0 left-0 p-4">
+          <h3 className="font-serif text-lg font-semibold text-white">{space.name}</h3>
         </div>
-        <p className="text-sm text-muted-foreground">{space.tagline}</p>
+      </div>
+      <div className="flex items-center justify-between p-4">
+        <p className="line-clamp-1 text-sm text-muted-foreground">{space.description}</p>
+        <ArrowRight className="size-4 shrink-0 text-primary" />
       </div>
     </Link>
   )

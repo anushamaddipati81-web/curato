@@ -1,82 +1,73 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Sparkles, ArrowRight } from 'lucide-react'
-import { EXAMPLE_SEARCHES } from '@/lib/data'
-import { Button } from '@/components/ui/button'
+import { Search, Loader2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-export function HeroSearch({
-  onSearch,
-  initialValue = '',
-}: {
-  onSearch: (query: string) => void
-  initialValue?: string
-}) {
-  const [value, setValue] = useState(initialValue)
+const SUGGESTED_SEARCHES = [
+  'White Kurti',
+  'Coffee Mug',
+  'Balcony Chair',
+  'Study Desk',
+  'Cushion Cover',
+]
 
-  function submit(query: string) {
-    const q = query.trim()
-    if (!q) return
-    onSearch(q)
+export function HeroSearch({ onSearch }: { onSearch: (query: string) => void }) {
+  const [query, setQuery] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!query.trim()) return
+    setLoading(true)
+    onSearch(query.trim())
+    setTimeout(() => setLoading(false), 500)
   }
 
   return (
     <div className="w-full">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          submit(value)
-        }}
-        className="relative"
-      >
-        <div className="flex items-center gap-2 rounded-2xl border border-border bg-card p-2 shadow-sm transition-shadow focus-within:shadow-md sm:gap-3 sm:p-2.5">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-            <Search className="size-5" strokeWidth={1.75} />
-          </span>
-          <input
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (
-                e.key === 'Enter' &&
-                !e.nativeEvent.isComposing &&
-                (e as unknown as { keyCode: number }).keyCode !== 229
-              ) {
-                e.preventDefault()
-                submit(value)
-              }
-            }}
-            placeholder="What would you like to create today?"
-            aria-label="Search for products or spaces"
-            className="min-w-0 flex-1 bg-transparent px-1 text-base text-foreground outline-none placeholder:text-muted-foreground sm:text-lg"
-          />
-          <Button type="submit" size="lg" className="hidden h-11 rounded-xl px-5 sm:inline-flex">
-            <Sparkles className="size-4" /> Curate
-          </Button>
-          <Button
+      <form onSubmit={handleSubmit} className="relative">
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-2 shadow-sm transition-shadow focus-within:shadow-md">
+          <div className="flex flex-1 items-center gap-3 pl-3">
+            {loading ? (
+              <Loader2 className="size-5 animate-spin text-primary" />
+            ) : (
+              <Search className="size-5 text-muted-foreground" />
+            )}
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search for a product, space, or look..."
+              className="flex-1 bg-transparent py-2 text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
+              disabled={loading}
+            />
+          </div>
+          <button
             type="submit"
-            size="icon-lg"
-            aria-label="Curate"
-            className="h-11 w-11 rounded-xl sm:hidden"
+            disabled={loading || !query.trim()}
+            className={cn(
+              'rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-opacity',
+              (loading || !query.trim()) && 'opacity-50',
+            )}
           >
-            <ArrowRight className="size-4.5" />
-          </Button>
+            Search
+          </button>
         </div>
       </form>
 
-      <div className="mt-5 flex flex-wrap items-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-muted-foreground">Try:</span>
-        {EXAMPLE_SEARCHES.map((example) => (
+        {SUGGESTED_SEARCHES.map((s) => (
           <button
-            key={example}
-            type="button"
+            key={s}
             onClick={() => {
-              setValue(example)
-              submit(example)
+              setQuery(s)
+              onSearch(s)
             }}
-            className="rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-muted-foreground shadow-sm transition-colors hover:border-primary/50 hover:text-foreground"
+            className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary/50 hover:bg-accent"
           >
-            {example}
+            {s}
           </button>
         ))}
       </div>

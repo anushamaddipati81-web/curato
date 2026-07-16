@@ -1,24 +1,18 @@
 'use client'
 
-import { useState } from 'react'
-import { Heart, StickyNote, ExternalLink, Check } from 'lucide-react'
-import { type Product, formatPrice } from '@/lib/data'
-import { useWorkspace } from '@/lib/workspace-context'
+import { Heart, ExternalLink, Star } from 'lucide-react'
 import { ProductImage } from '@/components/product-image'
-import { StarRating } from '@/components/star-rating'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { cn } from '@/lib/utils'
+import { useWorkspace } from '@/lib/workspace-context'
+import { cn, formatINR } from '@/lib/utils'
+import type { Product } from '@/lib/data'
 
 export function ProductCard({ product }: { product: Product }) {
-  const { isFavorite, toggleFavorite, productNotes, setProductNote } = useWorkspace()
-  const [notesOpen, setNotesOpen] = useState(false)
-  const [draft, setDraft] = useState(productNotes[product.id] ?? '')
-  const saved = isFavorite(product.id)
-  const hasNote = Boolean(productNotes[product.id])
+  const { toggleFavorite, isFavorite } = useWorkspace()
+  const fav = isFavorite(product.id)
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
       <div className="relative">
         <ProductImage
           category={product.category}
@@ -29,87 +23,34 @@ export function ProductCard({ product }: { product: Product }) {
           alt={product.title}
         />
         <button
-          type="button"
           onClick={() => toggleFavorite(product.id)}
-          aria-label={saved ? 'Remove from favorites' : 'Save to favorites'}
-          aria-pressed={saved}
-          className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full bg-card/90 text-foreground shadow-sm backdrop-blur transition-transform hover:scale-105"
+          className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm transition-colors hover:bg-background"
+          aria-label={fav ? 'Remove from favorites' : 'Add to favorites'}
         >
-          <Heart className={cn('size-4', saved && 'fill-primary text-primary')} strokeWidth={1.75} />
+          <Heart className={cn('size-4', fav ? 'fill-destructive text-destructive' : 'text-foreground/60')} />
         </button>
-        <span className="absolute left-3 top-3 rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
-          {product.platform}
-        </span>
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {product.brand}
-        </p>
-        <h3 className="text-pretty text-sm font-semibold leading-snug text-foreground">
-          {product.title}
-        </h3>
-
-        <div className="mt-1 flex items-center justify-between">
-          <span className="font-serif text-lg font-semibold text-foreground">
-            {formatPrice(product.price)}
-          </span>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <StarRating rating={product.rating} />
-            <span>({product.reviews.toLocaleString('en-IN')})</span>
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1">
+            <p className="text-xs font-medium text-muted-foreground">{product.brand}</p>
+            <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">
+              {product.title}
+            </h3>
           </div>
         </div>
 
-        {notesOpen && (
-          <div className="mt-1 animate-fade-up">
-            <Textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              placeholder="Add a research note about this product..."
-              className="min-h-20 text-xs"
-            />
-            <div className="mt-2 flex justify-end gap-2">
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => {
-                  setDraft(productNotes[product.id] ?? '')
-                  setNotesOpen(false)
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => {
-                  setProductNote(product.id, draft)
-                  setNotesOpen(false)
-                }}
-              >
-                <Check className="size-3.5" /> Save note
-              </Button>
-            </div>
-          </div>
-        )}
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Star className="size-3.5 fill-amber-400 text-amber-400" />
+          <span className="font-medium text-foreground">{product.rating}</span>
+          <span>({product.reviews.toLocaleString('en-IN')})</span>
+          <span className="text-border">|</span>
+          <span>{product.platform}</span>
+        </div>
 
-        <div className="mt-auto flex items-center gap-2 pt-3">
-          <Button
-            variant={saved ? 'secondary' : 'outline'}
-            size="sm"
-            className="flex-1"
-            onClick={() => toggleFavorite(product.id)}
-          >
-            <Heart className={cn('size-3.5', saved && 'fill-primary text-primary')} />
-            {saved ? 'Saved' : 'Save'}
-          </Button>
-          <Button
-            variant={hasNote ? 'secondary' : 'outline'}
-            size="icon-sm"
-            aria-label="Add notes"
-            onClick={() => setNotesOpen((v) => !v)}
-          >
-            <StickyNote className="size-3.5" />
-          </Button>
+        <div className="mt-auto flex items-center justify-between pt-2">
+          <span className="text-lg font-semibold text-foreground">{formatINR(product.price)}</span>
           {product.url ? (
             <Button
               variant="outline"
@@ -122,6 +63,6 @@ export function ProductCard({ product }: { product: Product }) {
           ) : null}
         </div>
       </div>
-    </article>
+    </div>
   )
 }

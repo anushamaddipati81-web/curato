@@ -1,67 +1,65 @@
 'use client'
 
-import { Suspense, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { PageHeader } from '@/components/page-header'
+import { Suspense, useMemo } from 'react'
+import { Shirt } from 'lucide-react'
 import { ProductGrid } from '@/components/product-grid'
+import { SectionHeading } from '@/components/section-heading'
 import { FASHION_CATEGORIES, PRODUCTS } from '@/lib/data'
-import { cn } from '@/lib/utils'
 
 function FashionContent() {
   const searchParams = useSearchParams()
-  const initial = searchParams.get('category') ?? 'All'
-  const [selected, setSelected] = useState(initial)
+  const activeCategory = searchParams.get('category')
 
-  const filters = ['All', ...FASHION_CATEGORIES]
-  const products = useMemo(
-    () =>
-      selected === 'All'
-        ? PRODUCTS.filter((p) => p.domain === 'fashion')
-        : PRODUCTS.filter((p) => p.category === selected),
-    [selected],
-  )
+  const products = useMemo(() => {
+    if (activeCategory) {
+      return PRODUCTS.filter((p) => p.domain === 'fashion' && p.category === activeCategory)
+    }
+    return PRODUCTS.filter((p) => p.domain === 'fashion')
+  }, [activeCategory])
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 lg:px-8 lg:py-12">
-      <PageHeader
-        eyebrow="Fashion"
-        title="Discover pieces worth curating"
-        description="Browse curated fashion categories for every mood and occasion. Save your favorites and add research notes as you compare."
+      <SectionHeading
+        title="Fashion"
+        subtitle="Curated clothing and accessories for every occasion"
       />
 
-      <div className="mt-8 flex flex-wrap gap-2">
-        {filters.map((cat) => (
-          <button
+      <div className="mb-8 flex flex-wrap gap-2.5">
+        <a
+          href="/fashion"
+          className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+            !activeCategory
+              ? 'border-primary bg-primary text-primary-foreground'
+              : 'border-border bg-card text-foreground hover:bg-accent'
+          }`}
+        >
+          All
+        </a>
+        {FASHION_CATEGORIES.map((cat) => (
+          <a
             key={cat}
-            type="button"
-            onClick={() => setSelected(cat)}
-            className={cn(
-              'rounded-full border px-4 py-2 text-sm font-medium transition-colors',
-              selected === cat
-                ? 'border-primary bg-primary/15 text-foreground'
-                : 'border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground',
-            )}
+            href={`/fashion?category=${encodeURIComponent(cat)}`}
+            className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+              activeCategory === cat
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border bg-card text-foreground hover:bg-accent'
+            }`}
           >
+            <Shirt className="size-3.5" />
             {cat}
-          </button>
+          </a>
         ))}
       </div>
 
-      <p className="mt-6 text-sm text-muted-foreground">
-        {products.length} {products.length === 1 ? 'product' : 'products'}
-        {selected !== 'All' && ` in ${selected}`}
-      </p>
-
-      <div className="mt-5">
-        <ProductGrid products={products} />
-      </div>
+      <ProductGrid products={products} />
     </div>
   )
 }
 
 export default function FashionPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<div className="mx-auto max-w-6xl px-4 py-12">Loading...</div>}>
       <FashionContent />
     </Suspense>
   )

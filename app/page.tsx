@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Sparkles, FolderPlus, X, Shirt, Loader as Loader2, Lightbulb, Search } from 'lucide-react'
+import { Sparkles, FolderPlus, X, Shirt, Loader2, Lightbulb, Search } from 'lucide-react'
 import { HeroSearch } from '@/components/hero-search'
 import { SectionHeading } from '@/components/section-heading'
 import { ProductGrid } from '@/components/product-grid'
@@ -21,10 +21,11 @@ import {
 type Results = (SearchResult & { saved: boolean }) | null
 
 export default function DashboardPage() {
-  const { addSearch, createCollection, savedCollections } = useWorkspace()
+  const { addSearch, createCollection, collections: savedCollections } = useWorkspace()
   const [results, setResults] = useState<Results>(null)
   const [loading, setLoading] = useState(false)
   const [suggestionResults, setSuggestionResults] = useState<Record<string, Product[]>>({})
+  const [suggestionLoading, setSuggestionLoading] = useState<string | null>(null)
 
   async function handleSearch(query: string) {
     addSearch(query)
@@ -50,7 +51,7 @@ export default function DashboardPage() {
 
   async function handleSuggestionSearch(suggestion: string) {
     if (suggestionResults[suggestion]) return
-    setLoading(true)
+    setSuggestionLoading(suggestion)
     try {
       const result = await searchCatalog(suggestion)
       setSuggestionResults((prev) => ({
@@ -60,7 +61,7 @@ export default function DashboardPage() {
     } catch {
       setSuggestionResults((prev) => ({ ...prev, [suggestion]: [] }))
     } finally {
-      setLoading(false)
+      setSuggestionLoading(null)
     }
   }
 
@@ -151,7 +152,7 @@ export default function DashboardPage() {
                     label={suggestion}
                     products={suggestionResults[suggestion]}
                     onSearch={() => handleSuggestionSearch(suggestion)}
-                    loading={loading}
+                    loading={suggestionLoading === suggestion}
                   />
                 ))}
               </div>
@@ -233,8 +234,8 @@ function SuggestionBlock({
         <h4 className="font-serif text-lg font-semibold text-foreground">{label}</h4>
         {!products && (
           <Button variant="outline" size="sm" onClick={onSearch} disabled={loading}>
-            <Search className="size-3.5" />
-            Find products
+            {loading ? <Loader2 className="size-3.5 animate-spin" /> : <Search className="size-3.5" />}
+            {loading ? 'Searching...' : 'Find products'}
           </Button>
         )}
       </div>

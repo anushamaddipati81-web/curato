@@ -8,42 +8,53 @@ export type SearchResult = {
   isRealData: boolean
 }
 
-// Maps natural-language keywords to categories/spaces in the catalog (fallback).
 const KEYWORD_MAP: { keywords: string[]; categories: string[]; label: string }[] = [
   { keywords: ['coffee'], categories: ['Coffee Corner'], label: 'Coffee Corner' },
   { keywords: ['tea'], categories: ['Tea Corner'], label: 'Tea Corner' },
   { keywords: ['balcony'], categories: ['Balcony', 'Garden'], label: 'Relaxing Balcony' },
   { keywords: ['garden', 'plant'], categories: ['Garden', 'Balcony'], label: 'Garden' },
-  { keywords: ['living', 'lounge'], categories: ['Living Room'], label: 'Elegant Living Room' },
+  { keywords: ['living', 'lounge', 'sofa'], categories: ['Living Room'], label: 'Elegant Living Room' },
   { keywords: ['bedroom', 'bed'], categories: ['Bedroom'], label: 'Minimal Bedroom' },
-  { keywords: ['dining', 'dinner', 'table'], categories: ['Dining Area'], label: 'Dining Area' },
+  { keywords: ['dining', 'dinner', 'plate'], categories: ['Dining Area'], label: 'Dining Area' },
   { keywords: ['kitchen', 'cook'], categories: ['Kitchen'], label: 'Kitchen' },
   { keywords: ['reading', 'book'], categories: ['Reading Corner'], label: 'Reading Corner' },
   { keywords: ['study', 'desk', 'work', 'productive'], categories: ['Study Desk'], label: 'Productive Study Desk' },
-  { keywords: ['entrance', 'entry', 'foyer'], categories: ['Entrance'], label: 'Entrance' },
-  { keywords: ['bathroom', 'bath', 'spa'], categories: ['Bathroom'], label: 'Bathroom' },
+  { keywords: ['entrance', 'entry', 'foyer', 'console'], categories: ['Entrance'], label: 'Entrance' },
+  { keywords: ['bathroom', 'bath', 'spa', 'towel'], categories: ['Bathroom'], label: 'Bathroom' },
   {
     keywords: ['ethnic', 'festive', 'festival', 'traditional'],
     categories: ['Kurtis', 'Jewellery', 'Footwear'],
     label: 'Festive Look',
   },
   {
-    keywords: ['office', 'formal', 'work outfit'],
+    keywords: ['office', 'formal', 'blazer'],
     categories: ['Jackets', 'Jeans', 'Watches', 'Handbags'],
     label: 'Office Outfit',
   },
   {
-    keywords: ['college', 'casual'],
+    keywords: ['college', 'casual', 't-shirt'],
     categories: ['T-Shirts', 'Jeans', 'Footwear', 'Tops'],
     label: 'College Outfit',
   },
   {
-    keywords: ['travel', 'trip'],
-    categories: ['Co-ord Sets', 'Sunglasses', 'Handbags', 'Footwear'],
+    keywords: ['travel', 'trip', 'vacation'],
+    categories: ['Sunglasses', 'Handbags', 'Footwear'],
     label: 'Travel Outfit',
   },
-  { keywords: ['dress'], categories: ['Dresses'], label: 'Dresses' },
+  { keywords: ['dress', 'gown'], categories: ['Dresses'], label: 'Dresses' },
   { keywords: ['kurti', 'kurta'], categories: ['Kurtis'], label: 'Kurtis' },
+  { keywords: ['palazzo'], categories: ['Palazzos'], label: 'Palazzos' },
+  { keywords: ['handbag', 'bag', 'tote'], categories: ['Handbags'], label: 'Handbags' },
+  { keywords: ['earring', 'jewellery', 'jhumka'], categories: ['Jewellery'], label: 'Jewellery' },
+  { keywords: ['watch'], categories: ['Watches'], label: 'Watches' },
+  { keywords: ['sunglass'], categories: ['Sunglasses'], label: 'Sunglasses' },
+  { keywords: ['mug', 'cup'], categories: ['Coffee Corner'], label: 'Coffee Corner' },
+  { keywords: ['chair'], categories: ['Balcony', 'Reading Corner', 'Study Desk'], label: 'Chairs' },
+  { keywords: ['cushion', 'pillow'], categories: ['Living Room', 'Bedroom'], label: 'Cushions & Covers' },
+  { keywords: ['lamp'], categories: ['Living Room', 'Bedroom', 'Study Desk'], label: 'Lamps' },
+  { keywords: ['planter', 'pot'], categories: ['Garden', 'Balcony'], label: 'Planters' },
+  { keywords: ['rug', 'carpet'], categories: ['Living Room'], label: 'Rugs' },
+  { keywords: ['candle'], categories: ['Coffee Corner'], label: 'Candles' },
 ]
 
 const SUGGESTION_MAP: Record<string, string[]> = {
@@ -55,13 +66,12 @@ const SUGGESTION_MAP: Record<string, string[]> = {
   'balcony chair': ['Cushion', 'Throw', 'Planter', 'Floor Lamp', 'Rug'],
   desk: ['Task Chair', 'Desk Lamp', 'Organizer', 'Notebook', 'Plant'],
   'study desk': ['Task Chair', 'Desk Lamp', 'Organizer', 'Notebook', 'Plant'],
-  cushion: ['Cushion Cover', 'Throw Blanket', 'Rug', 'Curtains', 'Vase'],
+  cushion: ['Throw Blanket', 'Rug', 'Curtains', 'Vase', 'Candle'],
   'cushion cover': ['Throw Blanket', 'Rug', 'Curtains', 'Vase', 'Candle'],
   dress: ['Heels', 'Handbag', 'Earrings', 'Watch', 'Sunglasses'],
   lamp: ['Bulb', 'Candle', 'Vase', 'Photo Frame', 'Book'],
   planter: ['Plant', 'Soil', 'Watering Can', 'Garden Tool', 'Plant Stand'],
   rug: ['Cushion', 'Throw', 'Coffee Table', 'Floor Lamp', 'Vase'],
-  saree: ['Blouse', 'Peticoat', 'Jewellery', 'Sandals', 'Handbag'],
   watch: ['Strap', 'Watch Box', 'Sunglasses', 'Wallet', 'Belt'],
   bag: ['Wallet', 'Keychain', 'Sunglasses', 'Scarf', 'Gloves'],
   coffee: ['Coffee Mug', 'Coffee Beans', 'French Press', 'Coasters', 'Tray'],
@@ -74,9 +84,9 @@ const SUGGESTION_MAP: Record<string, string[]> = {
 }
 
 function parseBudget(query: string): number | null {
-  const match = query.replace(/,/g, '').match(/(?:under|below|within)\s*(?:₹|rs\.?|inr)?\s*(\d{2,6})/i)
+  const match = query.replace(/,/g, '').match(/(?:under|below|within)\s*(?:\u20B9|rs\.?|inr)?\s*(\d{2,6})/i)
   if (match) return Number(match[1])
-  const bare = query.replace(/,/g, '').match(/(?:₹|rs\.?|inr)\s*(\d{2,6})/i)
+  const bare = query.replace(/,/g, '').match(/(?:\u20B9|rs\.?|inr)\s*(\d{2,6})/i)
   if (bare) return Number(bare[1])
   return null
 }
@@ -96,7 +106,7 @@ function localSearch(query: string): { label: string; products: Product[] } {
 
   for (const entry of KEYWORD_MAP) {
     if (entry.keywords.some((k) => q.includes(k))) {
-      matched.push(...PRODUCTS.filter((p) => entry.categories.includes(p.category)))
+      matched = PRODUCTS.filter((p) => entry.categories.includes(p.category))
       label = entry.label
       break
     }
@@ -167,7 +177,6 @@ export async function searchCatalog(query: string): Promise<SearchResult> {
       isRealData: true,
     }
   } catch {
-    // Fall back to local catalog search
     const { label, products: localProducts } = localSearch(query)
     let products = localProducts
 
