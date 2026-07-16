@@ -9,6 +9,8 @@ export type Product = {
   category: string
   domain: 'fashion' | 'home'
   tone: string
+  image?: string
+  url?: string
 }
 
 export type HomeSpace = {

@@ -25,6 +25,8 @@ export function ProductCard({ product }: { product: Product }) {
           tone={product.tone}
           className="aspect-4/3 w-full"
           iconClassName="size-14"
+          image={product.image}
+          alt={product.title}
         />
         <button
           type="button"
@@ -108,9 +110,16 @@ export function ProductCard({ product }: { product: Product }) {
           >
             <StickyNote className="size-3.5" />
           </Button>
-          <Button variant="outline" size="icon-sm" aria-label="Open product">
-            <ExternalLink className="size-3.5" />
-          </Button>
+          {product.url ? (
+            <Button
+              variant="outline"
+              size="icon-sm"
+              aria-label="Open product"
+              onClick={() => window.open(product.url, '_blank', 'noopener,noreferrer')}
+            >
+              <ExternalLink className="size-3.5" />
+            </Button>
+          ) : null}
         </div>
       </div>
     </article>

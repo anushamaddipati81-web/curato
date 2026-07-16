@@ -55,13 +55,39 @@ export function ProductImage({
   tone,
   className,
   iconClassName,
+  image,
+  alt,
 }: {
   category: string
   tone: string
   className?: string
   iconClassName?: string
+  image?: string
+  alt?: string
 }) {
   const Icon = ICON_MAP[category] ?? Armchair
+
+  if (image) {
+    return (
+      <div
+        className={cn('relative flex items-center justify-center overflow-hidden bg-muted', className)}
+      >
+        <img
+          src={image}
+          alt={alt ?? category}
+          className="h-full w-full object-cover"
+          loading="lazy"
+          onError={(e) => {
+            const target = e.currentTarget
+            target.style.display = 'none'
+            const parent = target.parentElement
+            if (parent) parent.style.backgroundColor = tone
+          }}
+        />
+      </div>
+    )
+  }
+
   return (
     <div
       className={cn('relative flex items-center justify-center overflow-hidden', className)}
